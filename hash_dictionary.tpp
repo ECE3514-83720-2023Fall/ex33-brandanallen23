@@ -116,24 +116,77 @@ void HashDictionary<KeyType, ValueType, HashType>::add(const KeyType &key,
     // TODO implement the add method...
     
     // 1. hash the key
+    std::size_t index = m_hash(key) % m_capacity;
     
     
     // 2. do linear probing
+    std::size_t numprobes = 0;
+    while (m_data[index].filled && (numprobes < m_capacity)) {
+        if (m_data[index].key == key) {
+            break;
+        }
+        index = (index + 1) % m_capacity;
+        numprobes += 1;
+    }
     
     // 3. Check to see if linear probing has failed
-    
+    if (numprobes == m_capacity) {
+        throw std::bad_alloc();
+    }
     // 4. insert the key-value pair
-   
-    // 5. test if we need to reallocate¡¡and reallocate if needed
-    
-      
+    else{
+        m_data[index].key = key;
+        m_data[index].value = value;
 
-}
+        m_size++;
+        m_data[index].filled = true;
+        // 5. test if we need to reallocateï¿½ï¿½and reallocate if needed
+        size_t realloc_capac_test = (m_capacity*2)/3;
+        if(m_size >= realloc_capac_test){
+            m_capacity *= 2;
+            KeyValueType* temp = new KeyValueType[m_capacity];
+            for(std::size_t i = 0; i < m_size; ++i){
+            temp[i] = m_data[i];
+            }
+            delete [] m_data;
+            m_data = new KeyValueType[m_capacity];
+            m_data = temp;
+        }
+        }
+    }
+   
+    
+    
+    
 
 template <typename KeyType, typename ValueType, typename HashType>
 void HashDictionary<KeyType, ValueType, HashType>::remove(const KeyType &key) {
     
     //TODO implement the remove method...
+    //1. Hash the key
+    std::size_t index = m_hash(key) % m_capacity;
+    
+    
+    // 2. do linear probing
+    std::size_t numprobes = 0;
+    while (m_data[index].filled && (m_size > 0)) {
+        numprobes += 1;
+        if (m_data[index].key == key) {
+            break;
+        }
+        index = (index + 1) % m_capacity;
+        
+    }
+    
+    // 3. Check to see if linear probing has failed
+    if (numprobes == 0) {
+        throw std::logic_error("Dictionary is empty");
+    }
+    // 4. insert the key-value pair
+    else{
+        m_data[index].filled = false;
+        m_size--;
+    }
 }
 
 template <typename KeyType, typename ValueType, typename HashType>
